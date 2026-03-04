@@ -1,6 +1,3 @@
-# Conversion to YAML from Properties formar report
-# Warnings:
-# - The yaml file had comments which are lost in the refactoring!
 server:
   port: 9000
 spring:
@@ -20,7 +17,11 @@ spring:
       add-mappings: false
   jackson:
     mapper:
-      ACCEPT_CASE_INSENSITIVE_ENUMS: 'true '
+      ACCEPT_CASE_INSENSITIVE_ENUMS: 'true'
+  data:
+    redis:
+      host: localhost
+      port: 6379
 springdoc:
   swagger-ui:
     enabled: true
