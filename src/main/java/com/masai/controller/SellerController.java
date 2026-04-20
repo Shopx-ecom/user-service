@@ -1,130 +1,107 @@
 package com.masai.controller;
 
-import java.util.List;
-
+/**
+ * @author Sameer Shaikh
+ * @date 31-03-2026
+ * @description
+ */
+import com.masai.core.Constants;
+import com.masai.core.DefaultFilter;
+import com.masai.core.FindResourceOption;
+import com.masai.core.enums.SellerStatus;
+import com.masai.core.enums.VerificationStatus;
+import com.masai.dto.SellerRequestDto;
+import com.masai.dto.SellerResponseDto;
+import com.masai.dto.SellerUpdateDto;
+import com.masai.models.Seller;
+import com.masai.filters.SellerFilter;
+import com.masai.mappers.SellerMapper;
+import com.masai.service.SellerService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import com.masai.models.Seller;
-import com.masai.models.SellerDTO;
-import com.masai.models.SessionDTO;
-import com.masai.service.SellerService;
+import java.util.List;
 
+@Tag(name = "Seller Controller")
 @RestController
+@RequestMapping("/api/v1/sellers")
+@RequiredArgsConstructor
 public class SellerController {
-	
-	@Autowired
-	private SellerService sService;
-	
-	
-	//Add seller-------------------------------------
-	
-	@PostMapping("/addseller")
-	public ResponseEntity<Seller> addSellerHandler(@Valid @RequestBody Seller seller){
-		
-		Seller addseller=sService.addSeller(seller);
-		
-		System.out.println("Seller"+ seller);
-		
-		return new ResponseEntity<Seller>(addseller,HttpStatus.CREATED);
-	}
-	
-	
-	
-	//Get the list of seller-----------------------
-	
-	
-	@GetMapping("/sellers")
-	public ResponseEntity<List<Seller>> getAllSellerHandler(){
-		
-		List<Seller> sellers=sService.getAllSellers();
-		
-		return new ResponseEntity<List<Seller>>(sellers, HttpStatus.OK);
-	}
-	
-	
-	//Get the seller by Id............................
-	
-	
-	@GetMapping("/seller/{sellerId}")
-	public ResponseEntity<Seller> getSellerByIdHandler(@PathVariable("sellerId") Integer Id){
-		
-		Seller getSeller=sService.getSellerById(Id);
-		
-		return new ResponseEntity<Seller>(getSeller, HttpStatus.OK);
-	}
-	
-	
-	// Get Seller by mobile Number
-	
-	@GetMapping("/seller")
-	public ResponseEntity<Seller> getSellerByMobileHandler(@RequestParam("mobile") String mobile, @RequestHeader("token") String token){
-		
-		Seller getSeller=sService.getSellerByMobile(mobile, token);
-		
-		return new ResponseEntity<Seller>(getSeller, HttpStatus.OK);
-	}
-	
-	
-	// Get currently logged in seller
-	
-	@GetMapping("/seller/current")
-	public ResponseEntity<Seller> getLoggedInSellerHandler(@RequestHeader("token") String token){
-		
-		Seller getSeller = sService.getCurrentlyLoggedInSeller(token);
-		
-		return new ResponseEntity<Seller>(getSeller, HttpStatus.OK);
-	}
-	
-	//Update the seller..............................
-	
-	
-	@PutMapping("/seller")
-	public ResponseEntity<Seller> updateSellerHandler(@RequestBody Seller seller, @RequestHeader("token") String token){
-		Seller updatedseller=sService.updateSeller(seller, token);
-		
-		return new ResponseEntity<Seller>(updatedseller,HttpStatus.ACCEPTED);
-		
-	}
-	
-	
-	@PutMapping("/seller/update/mobile")
-	public ResponseEntity<Seller> updateSellerMobileHandler(@Valid @RequestBody SellerDTO sellerdto, @RequestHeader("token") String token){
-		Seller updatedseller=sService.updateSellerMobile(sellerdto, token);
-		
-		return new ResponseEntity<Seller>(updatedseller,HttpStatus.ACCEPTED);
-		
-	}
-	
-	
-	@PutMapping("/seller/update/password")
-	public ResponseEntity<SessionDTO> updateSellerPasswordHandler(@Valid @RequestBody SellerDTO sellerDto, @RequestHeader("token") String token){
-		return new ResponseEntity<>(sService.updateSellerPassword(sellerDto, token), HttpStatus.ACCEPTED);
-	}
-	
-	
-	@DeleteMapping("/seller/{sellerId}")
-	public ResponseEntity<Seller> deleteSellerByIdHandler(@PathVariable("sellerId") Integer Id, @RequestHeader("token") String token){
-		
-		Seller deletedSeller=sService.deleteSellerById(Id, token);
-		
-		return new ResponseEntity<Seller>(deletedSeller,HttpStatus.OK);
-		
-	}
-	
-	
 
+    private final SellerService sellerService;
+
+    @PostMapping
+    @Operation(summary = "Endpoint to add seller details")
+    public ResponseEntity<SellerResponseDto> createSeller(@Valid @RequestBody SellerRequestDto dto, HttpServletRequest request) {
+
+        Long userId = (Long) request.getAttribute(Constants.SESSION_USER_ID);
+        Seller seller = SellerMapper.toEntity(dto);
+        seller.setUserId(userId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(SellerMapper.toResponseDto(sellerService.createSeller(seller)));
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Endpoint to fetch seller")
+    public ResponseEntity<SellerResponseDto> getSellerById(@PathVariable Long id) {
+        return ResponseEntity.ok(SellerMapper.toResponseDto(sellerService.getSellerById(id)));
+    }
+
+    @GetMapping
+    @Operation(summary = "Endpoint to fetch sellers with filter")
+    public ResponseEntity<List<SellerResponseDto>> getAllSellers(
+            @RequestParam(required = false) String storeName,
+            @RequestParam(required = false) String gstNumber,
+            @RequestParam(required = false) String panNumber,
+            @RequestParam(required = false) Long businessAddressId,
+            @RequestParam(required = false) SellerStatus sellerStatus,
+            @RequestParam(required = false) VerificationStatus verificationStatus,
+            @RequestParam(required = false) Boolean isActive,
+            @RequestParam(defaultValue = "0") Integer offset,
+            @RequestParam(defaultValue = "20") Integer limit,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "desc") String sortOrder
+    ) {
+        List<Seller> sellers = sellerService.getAllSellers(
+                SellerFilter.builder()
+                        .storeName(storeName)
+                        .gstNumber(gstNumber)
+                        .panNumber(panNumber)
+                        .businessAddressId(businessAddressId)
+                        .sellerStatus(sellerStatus)
+                        .verificationStatus(verificationStatus)
+                        .isActive(isActive)
+                        .build(),
+                FindResourceOption.builder()
+                        .offset(offset)
+                        .limit(limit)
+                        .sortBy(sortBy)
+                        .sortOrder(sortOrder)
+                        .build(),
+                DefaultFilter.builder().build()
+        );
+        return ResponseEntity.ok(sellers.stream().map(SellerMapper::toResponseDto).toList());
+    }
+
+    @PatchMapping("/{id}")
+    @Operation(summary = "Endpoint to update seller")
+    public ResponseEntity<SellerResponseDto> updateSeller(
+            @PathVariable Long id,
+            @Valid @RequestBody SellerUpdateDto dto
+    ) {
+        Seller updated = sellerService.updateSeller(id, SellerMapper.toUpdateMap(dto));
+        return ResponseEntity.ok(SellerMapper.toResponseDto(updated));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Endpoint to get single seller")
+    public ResponseEntity<Void> deleteSeller(@PathVariable Long id) {
+        sellerService.deleteSeller(id);
+        return ResponseEntity.noContent().build();
+    }
 }

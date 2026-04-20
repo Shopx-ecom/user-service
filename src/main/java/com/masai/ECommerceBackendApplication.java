@@ -3,6 +3,7 @@ package com.masai;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.Bean;
 
 import io.swagger.v3.oas.models.Components;
@@ -12,6 +13,7 @@ import io.swagger.v3.oas.models.info.License;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 
 
+@EnableDiscoveryClient
 @SpringBootApplication
 public class ECommerceBackendApplication {
 
@@ -19,26 +21,5 @@ public class ECommerceBackendApplication {
 		SpringApplication.run(ECommerceBackendApplication.class, args);
 		System.out.println("Ecommerce backend running !");
 	}
-	
-	@Bean
-public OpenAPI customOpenAPI(@Value("${springdoc.version}") String appVersion) {
-    return new OpenAPI()
-        .components(new Components().addSecuritySchemes("basicScheme",
-            new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("basic")))
-        .info(new Info()
-            .title("Shopx - E-Commerce Application REST API")
-            .version(appVersion)
-            .description(
-                    "Secure and scalable REST API services built for a e-commerce platform.\n" +
-                    "Includes modules for Customer, Seller, Product, Cart, and Order management.\n" +
-                    "Session-based authentication system with 1-hour validity for both customers and sellers.\n" +
-                    "Rest apis for all entities with real-time testing via Swagger UI.\n" +
-                    "Built using Spring Boot, Spring Data JPA, Hibernate, and PostgreSQL.\n"+
-					"\n \t-Created by Sameer Shaikh"+
-					"\n \t-Tech stack : Code Java (Streams, Exceptions, Builder, Generics), JWT Authentication, Spring Boot(MVC, Security, JPA/Hibernate), PostgreSQL, AWS EC2, Github Actions (CI/CD)"
-            )
-            );
-}
-
 
 }

@@ -1,11 +1,12 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:userdb
-    driver-class-name: org.h2.Driver
-    username: sameer
-    password: sameer#shopx
+    url: jdbc:postgresql://db.uniibtwattbeymhdzkxk.supabase.co:5432/postgres?sslmode=require
+    username: postgres
+    password: ZmdTCMp4cFvRiRNc
+    driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
+

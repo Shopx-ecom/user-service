@@ -1,60 +1,78 @@
 package com.masai.models;
 
+/**
+ * @author Sameer Shaikh
+ * @date 31-03-2026
+ * @description
+ */
 
-import java.util.List;
+import com.masai.core.BaseEntity;
+import com.masai.core.enums.Role;
+import com.masai.core.enums.SellerStatus;
+import com.masai.core.enums.VerificationStatus;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Seller {
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Integer sellerId;
-	
-	@NotNull(message="Please enter the first name")
-	@Pattern(regexp="[A-Za-z\\s]+", message="First Name should contains alphabets only")
-	private String firstName;
-	
-	@NotNull(message="Please enter the last name")
-	@Pattern(regexp="[A-Za-z\\s]+", message="First Name should contains alphabets only")
-	private String lastName;
-	
-   @Pattern(regexp="[A-Za-z0-9!@#$%^&*_]{8,15}", message="Please Enter a valid Password")
-	private String password;
-	
-	@NotNull(message="Please enter your mobile Number")
-	@Pattern(regexp="[6789]{1}[0-9]{9}", message="Enter a valid Mobile Number")
-	@Column(unique = true)
-	private String mobile;
-	
-	
-	@Email
-	@Column(unique = true)
-	private String emailId;
-	
+@ToString(callSuper = true)
+@Entity
+@Table(name = "sellers")
+@SuperBuilder
+public class Seller extends BaseEntity {
 
-	@OneToMany
-	@JsonIgnore
-	private List<Product> product;
-	
+    @Column(name="user_id",nullable = false)
+    private Long userId;
+    
+    @Column(name = "store_name", nullable = false)
+    private String storeName;
+
+    @Column(name = "store_description")
+    private String storeDescription;
+
+    @Column(name = "store_logo_url")
+    private String storeLogoUrl;
+
+    @Column(name = "gst_number", unique = true)
+    private String gstNumber;
+
+    @Column(name = "pan_number", unique = true)
+    private String panNumber;
+
+    @Column(name = "business_address_id")
+    private Long businessAddressId;
+
+    @Column(name = "bank_account_number")
+    private String bankAccountNumber;
+
+    @Column(name = "ifsc_code")
+    private String ifscCode;
+
+    @Column(name = "account_holder_name")
+    private String accountHolderName;
+
+    @Column(name = "total_products")
+    @Builder.Default
+    private Long totalProducts = 0L;
+
+    @Column(name = "total_orders")
+    @Builder.Default
+    private Long totalOrders = 0L;
+
+    @Column(name = "rating")
+    private Double rating;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "seller_status")
+    @Builder.Default
+    private SellerStatus sellerStatus = SellerStatus.ACTIVE;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "verification_status")
+    @Builder.Default
+    private VerificationStatus verificationStatus = VerificationStatus.PENDING;
 
 }
